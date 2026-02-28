@@ -7,6 +7,12 @@ import { UpgradesPanel } from '../components/UpgradesPanel';
 import { Leaderboard } from '../components/Leaderboard';
 import WorldMap from './WorldMap';
 
+const TILE_LABELS = {
+  plains: 'Plains', forest: 'Forest', mountain: 'Mountain',
+  goldvein: 'Gold Vein', lake: 'Lake', swamp: 'Swamp',
+  ruins: 'Ancient Ruins', village: 'Village',
+};
+
 export default function GamePage() {
   const { username, logout } = useAuth();
   const navigate = useNavigate();
@@ -106,8 +112,4 @@ export default function GamePage() {
   );
 }
 
-const TILE_LABELS = {
-  plains: 'Plains', forest: 'Forest', mountain: 'Mountain',
-  goldvein: 'Gold Vein', lake: 'Lake', swamp: 'Swamp',
-  ruins: 'Ancient Ruins', village: 'Village',
-};
+
