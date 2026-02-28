@@ -8,7 +8,6 @@ export function useGame() {
   const [loading, setLoading] = useState(true);
   const localState = useRef(null);
 
-  // Fetch initial state and upgrades
   const fetchState = useCallback(async () => {
     try {
       const [gameState, upgradeList] = await Promise.all([
@@ -30,9 +29,7 @@ export function useGame() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchState();
-  }, [fetchState]);
+  useEffect(() => { fetchState(); }, [fetchState]);
 
   // Local tick every 100ms for smooth UI
   useEffect(() => {
@@ -94,5 +91,15 @@ export function useGame() {
     }
   }, []);
 
-  return { state, upgrades, error, loading, buyUpgrade, doPrestige, refetch: fetchState };
+  // Called by WorldMap after a travel to update state immediately
+  const updateState = useCallback((newState) => {
+    localState.current = {
+      gold: parseFloat(newState.gold),
+      wood: parseFloat(newState.wood),
+      stone: parseFloat(newState.stone),
+    };
+    setState(newState);
+  }, []);
+
+  return { state, upgrades, error, loading, buyUpgrade, doPrestige, updateState, refetch: fetchState };
 }
