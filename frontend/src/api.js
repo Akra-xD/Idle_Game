@@ -24,4 +24,6 @@ export const api = {
   buyUpgrade: (id) => request(`/game/upgrade/${id}`, { method: 'POST' }),
   prestige: () => request('/game/prestige', { method: 'POST' }),
   leaderboard: () => request('/leaderboard'),
+  getMap: () => request('/map'),
+  travel: (q, r) => request('/map/travel', { method: 'POST', body: JSON.stringify({ q, r }) }),
 };
