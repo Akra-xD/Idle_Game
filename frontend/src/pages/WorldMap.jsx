@@ -326,9 +326,9 @@ export default function WorldMap({ playerState, onStateUpdate }) {
   const gridH = 7 * TILE_SIZE * 0.97 + TILE_SIZE + 20;
 
   const selectedTile = selected ? tiles.find(t => t.q === selected.q && t.r === selected.r) : null;
-  const selectedVisual = selectedTile ? TILE_VISUALS[selectedTile.type] : null;
+  const selectedVisual = selectedTile ? (TILE_VISUALS[selectedTile.type] || TILE_VISUALS.plains) : null;
   const currentTile = tiles.find(t => t.q === playerQ && t.r === playerR);
-  const currentVisual = currentTile ? TILE_VISUALS[currentTile.type] : null;
+  const currentVisual = currentTile ? (TILE_VISUALS[currentTile.type] || TILE_VISUALS.plains) : null;
 
   if (loading) return (
     <div className="map-loading">
