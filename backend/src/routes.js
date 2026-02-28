@@ -3,12 +3,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { pool } = require('./db');
 const { authMiddleware } = require('./middleware');
-const { getPlayerData, buyUpgrade, prestige } = require('./game');
+const { getPlayerData, buyUpgrade, travelToTile, prestige, getMap } = require('./game');
 const { UPGRADES } = require('./upgrades');
 
 const router = express.Router();
 
-// ─── Auth ───────────────────────────────────────────────────────────────────
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 
 router.post('/auth/register', async (req, res) => {
   const { username, password } = req.body;
@@ -23,12 +23,7 @@ router.post('/auth/register', async (req, res) => {
       [username.toLowerCase(), hash]
     );
     const user = rows[0];
-
-    // Create initial player state
-    await pool.query(
-      'INSERT INTO player_state (user_id) VALUES ($1)',
-      [user.id]
-    );
+    await pool.query('INSERT INTO player_state (user_id) VALUES ($1)', [user.id]);
 
     const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, username: user.username });
@@ -59,7 +54,7 @@ router.post('/auth/login', async (req, res) => {
   }
 });
 
-// ─── Game ────────────────────────────────────────────────────────────────────
+// ─── Game ──────────────────────────────────────────────────────────────────────
 
 router.get('/game/state', authMiddleware, async (req, res) => {
   try {
@@ -94,7 +89,30 @@ router.get('/game/upgrades', authMiddleware, (req, res) => {
   res.json(UPGRADES);
 });
 
-// ─── Leaderboard ─────────────────────────────────────────────────────────────
+// ─── Map ───────────────────────────────────────────────────────────────────────
+
+router.get('/map', authMiddleware, async (req, res) => {
+  try {
+    const tiles = await getMap(req.userId);
+    res.json(tiles);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.post('/map/travel', authMiddleware, async (req, res) => {
+  const { q, r } = req.body;
+  if (q === undefined || r === undefined) return res.status(400).json({ error: 'q and r required' });
+  try {
+    const data = await travelToTile(req.userId, parseInt(q), parseInt(r));
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ─── Leaderboard ───────────────────────────────────────────────────────────────
 
 router.get('/leaderboard', async (req, res) => {
   try {
