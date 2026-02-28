@@ -1,0 +1,152 @@
+# ⚔️ Idle Realm — PBBG Starter
+
+A full-stack idle persistent browser-based game with:
+
+- **Auth** — register/login with JWT tokens
+- **3 Resources** — Gold, Wood, Stone with offline catch-up gains
+- **8 Upgrades** — tiered with prerequisites and max quantities
+- **Prestige system** — reset for a permanent multiplier bonus
+- **Leaderboard** — top 20 players by prestige + gold
+- **Dark medieval UI** — React + custom CSS with smooth live ticking
+
+---
+
+## Project Structure
+
+```
+idle-pbbg/
+├── backend/          # Node.js + Express API
+│   ├── src/
+│   │   ├── index.js      # Server entry point
+│   │   ├── db.js         # PostgreSQL connection + schema
+│   │   ├── routes.js     # API routes
+│   │   ├── game.js       # Game logic (ticking, upgrades, prestige)
+│   │   ├── upgrades.js   # Upgrade definitions
+│   │   └── middleware.js # JWT auth middleware
+│   ├── package.json
+│   └── railway.toml
+│
+└── frontend/         # React + Vite
+    ├── src/
+    │   ├── App.jsx
+    │   ├── main.jsx
+    │   ├── index.css
+    │   ├── api.js            # API client
+    │   ├── AuthContext.jsx   # Auth state
+    │   ├── hooks/
+    │   │   └── useGame.js    # Game state + live ticking
+    │   ├── pages/
+    │   │   ├── AuthPage.jsx
+    │   │   └── GamePage.jsx
+    │   └── components/
+    │       ├── ResourceBar.jsx
+    │       ├── UpgradesPanel.jsx
+    │       └── Leaderboard.jsx
+    ├── package.json
+    ├── vite.config.js
+    └── railway.toml
+```
+
+---
+
+## Local Development
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL (local or use Railway's DB and connect remotely)
+
+### Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Fill in DATABASE_URL and JWT_SECRET in .env
+npm run dev
+# Runs on http://localhost:3001
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+# VITE_API_URL=http://localhost:3001 (default)
+npm run dev
+# Runs on http://localhost:5173
+```
+
+---
+
+## Deploying to Railway
+
+### Step 1 — Create a PostgreSQL database
+
+1. Go to [railway.app](https://railway.app) and open your project
+2. Click **+ New** → **Database** → **PostgreSQL**
+3. Once created, click it and copy the **DATABASE_URL** from the Variables tab
+
+### Step 2 — Deploy the Backend
+
+1. Click **+ New** → **GitHub Repo** → select your repo
+2. Set the **Root Directory** to `backend`
+3. Add these environment variables:
+   - `DATABASE_URL` — paste the URL from Step 1
+   - `JWT_SECRET` — any long random string (e.g. run `openssl rand -hex 32`)
+   - `NODE_ENV` — `production`
+   - `FRONTEND_URL` — your frontend URL (add after Step 3, can use `*` for now)
+4. Deploy — Railway will auto-detect Node.js
+
+### Step 3 — Deploy the Frontend
+
+1. Click **+ New** → **GitHub Repo** → select same repo
+2. Set the **Root Directory** to `frontend`
+3. Add environment variable:
+   - `VITE_API_URL` — your backend Railway URL (e.g. `https://my-backend.up.railway.app`)
+4. Deploy
+
+### Step 4 — Connect them
+
+- Copy your frontend's Railway URL
+- Go to the backend service → Variables → set `FRONTEND_URL` to that URL
+- Redeploy the backend
+
+---
+
+## API Reference
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/register` | No | Register new account |
+| POST | `/api/auth/login` | No | Login |
+| GET | `/api/game/state` | Yes | Get current player state (also ticks) |
+| POST | `/api/game/upgrade/:id` | Yes | Buy an upgrade |
+| POST | `/api/game/prestige` | Yes | Prestige (requires 10,000 gold) |
+| GET | `/api/game/upgrades` | Yes | List all upgrade definitions |
+| GET | `/api/leaderboard` | No | Top 20 players |
+
+---
+
+## Extending the Game
+
+**Add a new upgrade** — edit `backend/src/upgrades.js` and add a new entry. No DB migration needed.
+
+**Add a new resource** — add the column to `player_state` in `db.js`, add the field to `game.js` tick logic, and display it in `ResourceBar.jsx`.
+
+**Add clicking** — create a `/api/game/click` endpoint that adds a small amount of resources per click.
+
+**Add achievements** — create an `achievements` table and check conditions after each tick.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Node.js, Express |
+| Database | PostgreSQL |
+| Auth | bcryptjs + JWT |
+| Frontend | React 18, Vite |
+| Styling | Custom CSS (no framework) |
+| Hosting | Railway |
