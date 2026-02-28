@@ -372,7 +372,7 @@ export default function WorldMap({ playerState, onStateUpdate }) {
           </div>
 
           {/* Selected tile info */}
-          {selectedTile && selectedTile.q !== playerQ || selectedTile?.r !== playerR ? (
+          {selectedTile && (selectedTile.q !== playerQ || selectedTile.r !== playerR) ? (
             <div className="map-info-card selected-tile">
               <div className="map-info-label">Selected Tile</div>
               <div className="map-info-tile">
